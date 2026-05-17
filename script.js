@@ -73,17 +73,17 @@ function playBell() {
   function ring(freq, peak, decay, delay = 0) {
     const t = ctx.currentTime + delay;
     const osc = ctx.createOscillator();
-    osc.type = "sine";
+    osc.type = "sawtooth"; // sine, square, sawtooth, or triangle
     osc.frequency.value = freq;
 
     const lp = ctx.createBiquadFilter();
-    lp.type = "lowpass";
-    lp.frequency.value = 4000;
+    lp.type = "lowpass"; // Types include: lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass
+    lp.frequency.value = 1000;
 
     const g = ctx.createGain();
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(peak, t + 0.012); // soft attack
-    g.gain.exponentialRampToValueAtTime(0.001, t + decay);
+    g.gain.linearRampToValueAtTime(peak, t + 0.0000002); // soft attack
+    g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
 
     osc.connect(lp);
     lp.connect(g);
@@ -93,13 +93,31 @@ function playBell() {
   }
 
   // First strike – bright harmonics
-  ring(880, 0.45, 1.9);
-  ring(1320, 0.22, 1.3);
-  ring(2200, 0.09, 0.75);
+  // ring(880, 0.45, 1.9);
+  // ring(1320, 0.22, 1.3); // E note
+  // ring(2200, 0.09, 0.75);
 
   // Second strike – a touch lower, softer
-  ring(660, 0.32, 1.5, 0.42);
-  ring(990, 0.14, 1.0, 0.42);
+  // ring(660, 0.32, 1.5, 0.42);
+  // ring(990, 0.14, 1.0, 0.4); // B note
+
+  // ring(1760, 0.22, 1.3, 0.8); // A note
+
+  // https://nch-nch.ru/frequency/
+  //third octave
+  ring(1046, 0.22, 2.3, 0); // С note
+
+  ring(1174, 0.22, 2.3, 0.4); // В note
+
+  ring(1318, 0.22, 2.3, 0.8); // E note
+
+  // ring(1397, 0.22, 1.3, 1.2); // F note
+
+  // ring(1568, 0.22, 1.3, 1.6); // G note
+
+  // ring(1720, 0.22, 1.3, 2.0); // A note
+
+  // ring(1975, 0.22, 1.3, 2.4); // B note
 }
 
 /* ═══════════════════════════════════════
@@ -221,3 +239,15 @@ modeBtns.forEach((btn) => {
 
 // Init
 setProgress(1);
+
+// document.body.innerHTML += `<button class="testSound">sound</button>`;
+
+const soundTest = document.getElementById("testSound");
+soundTest.addEventListener("click", () => {
+  playClick(); // 🖱 click sound on every start/stop
+});
+
+const soundTestBell = document.getElementById("testBell");
+soundTestBell.addEventListener("click", () => {
+  playBell(); // 🖱 click sound on every start/stop
+});
