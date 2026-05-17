@@ -1,3 +1,111 @@
+/* ═══════════════════════════════════════
+       Web Audio – sounds synthesised on the fly
+    ═══════════════════════════════════════ */
+let audioCtx = null;
+
+function getCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  // Resume if suspended (browser autoplay policy)
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+/**
+ * Mechanical click:
+ *  – short white-noise burst filtered to a mid-freq "snap"
+ *  – layered with a fast-decaying low thump
+ */
+function playClick() {
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+
+  // — Noise snap —
+  const samples = Math.floor(ctx.sampleRate * 0.045);
+  const buffer = ctx.createBuffer(1, samples, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < samples; i++) data[i] = Math.random() * 2 - 1;
+
+  const noiseSrc = ctx.createBufferSource();
+  noiseSrc.buffer = buffer;
+
+  const bandpass = ctx.createBiquadFilter();
+  bandpass.type = "bandpass";
+  bandpass.frequency.value = 1100;
+  bandpass.Q.value = 0.9;
+
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0.32, t);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+
+  noiseSrc.connect(bandpass);
+  bandpass.connect(noiseGain);
+  noiseGain.connect(ctx.destination);
+  noiseSrc.start(t);
+  noiseSrc.stop(t + 0.05);
+
+  // — Low thump —
+  const thump = ctx.createOscillator();
+  thump.type = "sine";
+  thump.frequency.setValueAtTime(190, t);
+  thump.frequency.exponentialRampToValueAtTime(55, t + 0.065);
+
+  const thumpGain = ctx.createGain();
+  thumpGain.gain.setValueAtTime(0.52, t);
+  thumpGain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+
+  thump.connect(thumpGain);
+  thumpGain.connect(ctx.destination);
+  thump.start(t);
+  thump.stop(t + 0.08);
+}
+
+/**
+ * Soft bell:
+ *  – three sine partials (fundamental + harmonics) with short attack, long decay
+ *  – a second, slightly lower ring after ~420 ms
+ *  – gentle low-pass to keep it warm, not piercing
+ */
+function playBell() {
+  const ctx = getCtx();
+
+  function ring(freq, peak, decay, delay = 0) {
+    const t = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 4000;
+
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(peak, t + 0.012); // soft attack
+    g.gain.exponentialRampToValueAtTime(0.001, t + decay);
+
+    osc.connect(lp);
+    lp.connect(g);
+    g.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + decay + 0.05);
+  }
+
+  // First strike – bright harmonics
+  ring(880, 0.45, 1.9);
+  ring(1320, 0.22, 1.3);
+  ring(2200, 0.09, 0.75);
+
+  // Second strike – a touch lower, softer
+  ring(660, 0.32, 1.5, 0.42);
+  ring(990, 0.14, 1.0, 0.42);
+}
+
+/* ═══════════════════════════════════════
+       Timer logic
+    ═══════════════════════════════════════ */
+
 const CIRCUMFERENCE = 2 * Math.PI * 168; // ≈ 1055.6
 
 const ring = document.getElementById("progressRing");
@@ -85,6 +193,9 @@ function complete() {
   remainSeconds = totalSeconds;
   display.textContent = formatTime(remainSeconds);
   setProgress(1);
+
+  playBell(); // 🔔 soft bell on finish
+
   // Flash animation
   display.classList.add("flash");
   display.addEventListener(
@@ -96,6 +207,7 @@ function complete() {
 
 /* ── events ── */
 controlBtn.addEventListener("click", () => {
+  playClick(); // 🖱 click sound on every start/stop
   isRunning ? stop() : start();
 });
 

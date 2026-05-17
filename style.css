@@ -7,20 +7,20 @@
 }
 
 :root {
-  --bg: #0d0d0d;
-  --surface: #161616;
-  --ring-bg: #1e1e1e;
-  --accent: #ffb247;
-  --accent-dim: #cc832a;
-  --text: #f0f0f0;
-  --muted: #555;
-  --danger: #ff4f4f;
+  --bg: #f5f0e8;
+  --surface: #ede8df;
+  --ring-bg: #ddd6c8;
+  --accent: #c8a96e;
+  --accent-dk: #a8844a;
+  --text: #3a3228;
+  --muted: #a0907c;
+  --danger: #c0614a;
   --ring-size: 380px;
   --stroke: 14px;
-  --r: 168;
 }
 
 body {
+  margin-top: -40px;
   min-height: 100vh;
   background: var(--bg);
   display: flex;
@@ -39,7 +39,7 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.4;
+  /* opacity: 0.4; */
 }
 
 h1 {
@@ -84,6 +84,10 @@ h1 {
     stroke 0.4s ease;
 }
 
+.ring-progress.running-glow {
+  filter: drop-shadow(0 0 5px rgba(200, 169, 110, 0.55));
+}
+
 /* ── Inner panel ── */
 .inner {
   position: absolute;
@@ -105,7 +109,7 @@ h1 {
 
 .mode-btn {
   background: transparent;
-  border: 1px solid var(--muted);
+  border: 1px solid var(--ring-bg);
   color: var(--muted);
   font-family: "DM Mono", monospace;
   font-size: 10px;
@@ -118,14 +122,14 @@ h1 {
 }
 
 .mode-btn:hover {
-  border-color: var(--text);
+  border-color: var(--muted);
   color: var(--text);
 }
 
 .mode-btn.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #0d0d0d;
+  color: #fff8ee;
   font-weight: 500;
 }
 
@@ -162,7 +166,7 @@ h1 {
   border-radius: 50%;
   border: none;
   background: var(--accent);
-  color: #0d0d0d;
+  color: #fff8ee;
   font-family: "Syne", sans-serif;
   font-size: 12px;
   font-weight: 800;
@@ -176,22 +180,27 @@ h1 {
     transform 0.15s ease,
     background 0.25s ease,
     box-shadow 0.25s ease;
-  box-shadow: 0 0 0 0 rgba(232, 255, 71, 0);
+  box-shadow:
+    0 4px 18px rgba(200, 169, 110, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   position: relative;
 }
 
 .control-btn::after {
   content: "";
   position: absolute;
-  inset: -4px;
+  inset: -5px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 196, 0, 0.534);
+  border: 1px solid rgba(200, 169, 110, 0.3);
   pointer-events: none;
+  transition: border-color 0.25s ease;
 }
 
 .control-btn:hover {
   transform: scale(1.06);
-  box-shadow: 0 0 28px rgba(255, 196, 0, 0.534);
+  box-shadow:
+    0 6px 28px rgba(200, 169, 110, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .control-btn:active {
@@ -202,32 +211,18 @@ h1 {
   background: var(--surface);
   color: var(--danger);
   border: 1.5px solid var(--danger);
-  box-shadow: 0 0 0 0 rgba(255, 79, 79, 0);
+  box-shadow:
+    0 4px 18px rgba(192, 97, 74, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .control-btn.running::after {
-  border-color: rgba(255, 79, 79, 0.25);
+  border-color: rgba(192, 97, 74, 0.25);
 }
-
 .control-btn.running:hover {
-  box-shadow: 0 0 28px rgba(255, 79, 79, 0.35);
-}
-
-/* Pulse when running */
-@keyframes pulse-ring {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 196, 0, 0.534);
-  }
-  70% {
-    box-shadow: 0 0 0 16px rgba(232, 255, 71, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(232, 255, 71, 0);
-  }
-}
-
-.ring-progress.running-glow {
-  filter: drop-shadow(0 0 6px rgba(255, 196, 0, 0.534));
+  box-shadow:
+    0 6px 26px rgba(192, 97, 74, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* Completed flash */
