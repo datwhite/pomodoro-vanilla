@@ -186,6 +186,7 @@ function setProgress(fraction) {
 
 function render(secs) {
   display.textContent = formatTime(secs);
+  document.title = formatTime(secs);
   setProgress(secs / totalSeconds);
   if (secs <= 60) {
     display.classList.add("warning");
